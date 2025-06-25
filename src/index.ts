@@ -186,24 +186,20 @@ class KitMcpServer {
           },
           {
             name: 'kit_subscriber_lookup',
-            description: 'Individual subscriber detailed analysis with engagement history',
+            description: 'Individual subscriber detailed analysis with engagement history. Provide either subscriber_id OR email.',
             inputSchema: {
               type: 'object',
               properties: {
                 subscriber_id: {
                   type: 'string',
-                  description: 'Subscriber ID for lookup'
+                  description: 'Subscriber ID for lookup (provide either this or email)'
                 },
                 email: {
                   type: 'string',
                   format: 'email',
-                  description: 'Email address for lookup'
+                  description: 'Email address for lookup (provide either this or subscriber_id)'
                 }
-              },
-              oneOf: [
-                { required: ['subscriber_id'] },
-                { required: ['email'] }
-              ]
+              }
             }
           },
           {
@@ -430,6 +426,17 @@ class KitMcpServer {
   }
 
   private async handleSubscriberLookup(params: SubscriberLookupParams) {
+    if (!params.subscriber_id && !params.email) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: 'Error: Either subscriber_id or email must be provided for lookup.'
+          }
+        ]
+      };
+    }
+
     if (params.subscriber_id) {
       const result = await this.apiClient.getSubscriber(parseInt(params.subscriber_id));
       return {
