@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "convertkit-marketing-automation": {
+      "command": "node",
+      "args": ["./dist/index.js"],
+      "cwd": "./mcp-servers/convertkit-marketing-automation",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

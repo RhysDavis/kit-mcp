@@ -1,0 +1,58 @@
+{
+  "name": "kit-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for Kit - Marketing automation, email campaigns, and subscriber management",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "axios": "^1.6.8",
+    "date-fns": "^3.6.0",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "convertkit",
+    "marketing-automation",
+    "email-marketing",
+    "campaign-optimization",
+    "subscriber-management",
+    "marketing-analytics"
+  ],
+  "author": "Kit MCP Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhysdavis/kit-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rhysdavis/kit-mcp/issues"
+  },
+  "homepage": "https://github.com/rhysdavis/kit-mcp#readme",
+  "rateLimit": {
+    "requestsPerMinute": 100,
+    "burstLimit": 10
+  },
+  "caching": {
+    "enabled": true,
+    "ttl": 300,
+    "maxSize": 1000
+  }
+}
