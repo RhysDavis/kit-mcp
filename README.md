@@ -150,12 +150,12 @@ After installation, configure the MCP server with Claude Code:
 
 ### Add to Current Project
 ```bash
-claude mcp add kit-mcp /path/to/kit-mcp/dist/index.js
+claude mcp add kit-mcp -- bash -c "cd /path/to/kit-mcp && npm start"
 ```
 
 ### Add for All Projects (User-wide)
 ```bash
-claude mcp add -s user kit-mcp /path/to/kit-mcp/dist/index.js
+claude mcp add -s user kit-mcp -- bash -c "cd /path/to/kit-mcp && npm start"
 ```
 
 ### Verify Configuration

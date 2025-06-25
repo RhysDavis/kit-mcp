@@ -56,3 +56,40 @@ export interface FormOptimizationParams {
   include_ab_testing_suggestions?: boolean;
   performance_period_days?: number;
 }
+
+// New enhanced analysis parameter types
+export interface HistoricalAnalysisParams {
+  analysis_type?: 'growth' | 'subscriber_lifecycle' | 'sequence_adoption' | 'all';
+}
+
+export interface SubscriberIntelligenceParams {
+  analysis_depth?: 'basic' | 'detailed' | 'comprehensive';
+  include_tag_analysis?: boolean;
+  include_sequence_participation?: boolean;
+}
+
+export interface SequenceIntelligenceParams {
+  include_subscriber_analysis?: boolean;
+  include_business_era_context?: boolean;
+}
+
+export interface BroadcastMiningParams {
+  include_performance_data?: boolean;
+  include_click_analysis?: boolean;
+  time_period?: DateRange;
+}
+
+export interface TagIntelligenceParams {
+  include_usage_analysis?: boolean;
+  include_behavioral_patterns?: boolean;
+}
+
+export interface PerformanceBaselineParams {
+  include_recent_performance?: boolean;
+  include_historical_estimates?: boolean;
+}
+
+export interface ReactivationStrategyParams {
+  dormancy_indicators?: string[];
+  value_assessment_method?: 'tag_count' | 'sequence_participation' | 'historical_patterns';
+}

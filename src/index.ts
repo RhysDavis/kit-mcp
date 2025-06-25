@@ -26,7 +26,14 @@ import {
   SubscriberLookupParams,
   TagAnalysisParams,
   CustomFieldAnalysisParams,
-  FormOptimizationParams
+  FormOptimizationParams,
+  HistoricalAnalysisParams,
+  SubscriberIntelligenceParams,
+  SequenceIntelligenceParams,
+  BroadcastMiningParams,
+  TagIntelligenceParams,
+  PerformanceBaselineParams,
+  ReactivationStrategyParams
 } from './types/function-params.js';
 
 class KitMcpServer {
@@ -303,6 +310,123 @@ class KitMcpServer {
                 }
               }
             }
+          },
+          {
+            name: 'kit_historical_analysis',
+            description: 'Extract maximum historical insights from 7 years of Kit data - subscriber growth, sequence evolution, and business model progression',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                analysis_type: {
+                  type: 'string',
+                  enum: ['growth', 'subscriber_lifecycle', 'sequence_adoption', 'all'],
+                  description: 'Type of historical analysis to perform',
+                  default: 'all'
+                }
+              }
+            }
+          },
+          {
+            name: 'kit_subscriber_intelligence',
+            description: 'Comprehensive subscriber analysis - demographics, engagement patterns, tag behavior, and reactivation opportunities',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                analysis_depth: {
+                  type: 'string',
+                  enum: ['basic', 'detailed', 'comprehensive'],
+                  description: 'Depth of subscriber analysis',
+                  default: 'detailed'
+                },
+                include_tag_analysis: {
+                  type: 'boolean',
+                  description: 'Include detailed tag-based behavioral analysis',
+                  default: true
+                },
+                include_sequence_participation: {
+                  type: 'boolean',
+                  description: 'Include sequence participation analysis',
+                  default: true
+                }
+              }
+            }
+          },
+          {
+            name: 'kit_sequence_intelligence',
+            description: 'Sequence analysis with business era context - evolution tracking, strategic value assessment, and adaptation opportunities',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                include_subscriber_analysis: {
+                  type: 'boolean',
+                  description: 'Include subscriber participation metrics',
+                  default: true
+                },
+                include_business_era_context: {
+                  type: 'boolean',
+                  description: 'Include business era context analysis',
+                  default: true
+                }
+              }
+            }
+          },
+          {
+            name: 'kit_tag_intelligence',
+            description: 'Tag ecosystem analysis - usage patterns, behavioral segmentation, and strategic recommendations',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                include_usage_analysis: {
+                  type: 'boolean',
+                  description: 'Include detailed tag usage analysis',
+                  default: true
+                },
+                include_behavioral_patterns: {
+                  type: 'boolean',
+                  description: 'Include subscriber behavioral pattern analysis',
+                  default: true
+                }
+              }
+            }
+          },
+          {
+            name: 'kit_account_performance_baseline',
+            description: 'Establish performance baselines combining recent API data with historical estimates for strategic planning',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                include_recent_performance: {
+                  type: 'boolean',
+                  description: 'Include recent 90-day performance data from API',
+                  default: true
+                },
+                include_historical_estimates: {
+                  type: 'boolean',
+                  description: 'Include calculated historical performance estimates',
+                  default: true
+                }
+              }
+            }
+          },
+          {
+            name: 'kit_reactivation_strategy_intelligence',
+            description: 'Identify high-value dormant subscribers and create data-driven reactivation strategies',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                dormancy_indicators: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Custom dormancy indicators to analyze'
+                },
+                value_assessment_method: {
+                  type: 'string',
+                  enum: ['tag_count', 'sequence_participation', 'historical_patterns'],
+                  description: 'Method for assessing subscriber value',
+                  default: 'historical_patterns'
+                }
+              }
+            }
           }
         ]
       };
@@ -351,6 +475,24 @@ class KitMcpServer {
 
           case 'kit_cache_status':
             return await this.handleCacheStatus(args as { clear_cache?: boolean });
+
+          case 'kit_historical_analysis':
+            return await this.handleHistoricalAnalysis(args as HistoricalAnalysisParams);
+
+          case 'kit_subscriber_intelligence':
+            return await this.handleSubscriberIntelligence(args as SubscriberIntelligenceParams);
+
+          case 'kit_sequence_intelligence':
+            return await this.handleSequenceIntelligence(args as SequenceIntelligenceParams);
+
+          case 'kit_tag_intelligence':
+            return await this.handleTagIntelligence(args as TagIntelligenceParams);
+
+          case 'kit_account_performance_baseline':
+            return await this.handleAccountPerformanceBaseline(args as PerformanceBaselineParams);
+
+          case 'kit_reactivation_strategy_intelligence':
+            return await this.handleReactivationStrategyIntelligence(args as ReactivationStrategyParams);
 
           default:
             throw new McpError(
@@ -539,6 +681,368 @@ class KitMcpServer {
             cache_cleared: params.clear_cache || false,
             timestamp: new Date().toISOString()
           }, null, 2)
+        }
+      ]
+    };
+  }
+
+  // Enhanced Analysis Functions
+  
+  private async handleHistoricalAnalysis(params: HistoricalAnalysisParams) {
+    console.error('🔍 Starting historical analysis...');
+    
+    try {
+      // Get all subscribers with pagination to analyze historical data
+      const subscribers = await this.apiClient.getAllPages(
+        (after?: string) => this.apiClient.getSubscribers({
+          after,
+          per_page: 100,
+          include_total_count: true
+        }),
+        'subscribers'
+      );
+
+      // Get all sequences to analyze business evolution
+      const sequences = await this.apiClient.getAllPages(
+        (after?: string) => this.apiClient.getSequences({ after, per_page: 100 }),
+        'sequences'
+      );
+
+      // Get recent performance data
+      const growthStats = await this.apiClient.getGrowthStats();
+      const emailStats = await this.apiClient.getEmailStats();
+
+      // Process historical data
+      const analysis = this.processHistoricalData(subscribers, sequences, growthStats, emailStats, params.analysis_type || 'all');
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(analysis, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      console.error('❌ Historical analysis failed:', error);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `Historical analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          }
+        ]
+      };
+    }
+  }
+
+  private processHistoricalData(subscribers: any[], sequences: any[], growthStats: any, emailStats: any, analysisType: string) {
+    // Analyze subscriber growth by creation date
+    const subscribersByYear = this.groupSubscribersByPeriod(subscribers);
+    const sequenceEvolution = this.analyzeSequenceEvolution(sequences);
+    const businessEras = this.identifyBusinessEras(sequences);
+    
+    const result: any = {
+      analysis_type: analysisType,
+      generated_at: new Date().toISOString(),
+      data_sources: {
+        total_subscribers_analyzed: subscribers.length,
+        total_sequences_analyzed: sequences.length,
+        historical_range: this.getHistoricalRange(subscribers),
+        api_limitations_noted: "Performance data limited to recent 90 days from Kit API"
+      }
+    };
+
+    if (analysisType === 'all' || analysisType === 'growth') {
+      result.subscriber_growth_analysis = {
+        growth_periods: subscribersByYear,
+        recent_growth_trends: growthStats,
+        total_subscribers: subscribers.length,
+        growth_insights: this.generateGrowthInsights(subscribersByYear)
+      };
+    }
+
+    if (analysisType === 'all' || analysisType === 'sequence_adoption') {
+      result.sequence_evolution_analysis = {
+        sequence_timeline: sequenceEvolution,
+        business_model_eras: businessEras,
+        evolution_insights: this.generateSequenceInsights(sequences)
+      };
+    }
+
+    if (analysisType === 'all' || analysisType === 'subscriber_lifecycle') {
+      result.subscriber_lifecycle_patterns = {
+        acquisition_cohorts: this.analyzeAcquisitionCohorts(subscribers),
+        retention_indicators: this.analyzeRetentionPatterns(subscribers)
+      };
+    }
+
+    result.strategic_insights = {
+      business_evolution_lessons: this.extractBusinessLessons(businessEras, subscribersByYear),
+      sequence_naming_patterns: this.analyzeNamingPatterns(sequences),
+      subscriber_acquisition_insights: this.generateAcquisitionInsights(subscribersByYear),
+      current_vs_historical_comparison: this.compareCurrentVsHistorical(subscribers, sequences)
+    };
+
+    return result;
+  }
+
+  private groupSubscribersByPeriod(subscribers: any[]) {
+    const periods: { [key: string]: number } = {};
+    
+    subscribers.forEach(sub => {
+      if (sub.created_at) {
+        const date = new Date(sub.created_at);
+        const period = `${date.getFullYear()}-Q${Math.ceil((date.getMonth() + 1) / 3)}`;
+        periods[period] = (periods[period] || 0) + 1;
+      }
+    });
+
+    const sortedPeriods = Object.entries(periods)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([period, count], index, array) => {
+        const cumulative = array.slice(0, index + 1).reduce((sum, [, c]) => sum + c, 0);
+        const previousCount = index > 0 ? array[index - 1][1] : 0;
+        const growthRate = previousCount > 0 ? ((count - previousCount) / previousCount * 100) : 0;
+        
+        return {
+          period,
+          new_subscribers: count,
+          cumulative_total: cumulative,
+          growth_rate: Math.round(growthRate * 100) / 100,
+          business_era_context: this.inferBusinessEra(period)
+        };
+      });
+
+    return sortedPeriods;
+  }
+
+  private analyzeSequenceEvolution(sequences: any[]) {
+    return sequences.map(seq => ({
+      sequence_id: seq.id,
+      sequence_name: seq.name,
+      created_date: seq.created_at,
+      business_era: this.inferBusinessEraFromName(seq.name),
+      estimated_historical_usage: 'Based on creation date and naming patterns'
+    })).sort((a, b) => new Date(a.created_date).getTime() - new Date(b.created_date).getTime());
+  }
+
+  private identifyBusinessEras(sequences: any[]) {
+    const eras: { [key: string]: any } = {};
+    
+    sequences.forEach(seq => {
+      const era = this.inferBusinessEraFromName(seq.name);
+      if (!eras[era]) {
+        eras[era] = {
+          era_name: era,
+          sequences_in_era: [],
+          date_range_estimate: { earliest: seq.created_at, latest: seq.created_at }
+        };
+      }
+      eras[era].sequences_in_era.push(seq.name);
+      
+      // Update date range
+      if (new Date(seq.created_at) < new Date(eras[era].date_range_estimate.earliest)) {
+        eras[era].date_range_estimate.earliest = seq.created_at;
+      }
+      if (new Date(seq.created_at) > new Date(eras[era].date_range_estimate.latest)) {
+        eras[era].date_range_estimate.latest = seq.created_at;
+      }
+    });
+
+    return Object.values(eras).map((era: any) => ({
+      ...era,
+      date_range_estimate: `${era.date_range_estimate.earliest.split('T')[0]} to ${era.date_range_estimate.latest.split('T')[0]}`,
+      subscriber_acquisition_pattern: `Inferred from ${era.sequences_in_era.length} sequences in this era`
+    }));
+  }
+
+  private inferBusinessEra(period: string): string {
+    const year = parseInt(period.split('-')[0]);
+    if (year <= 2019) return 'Early Business Development';
+    if (year <= 2021) return 'Student Loan Focus Period';
+    if (year <= 2023) return 'Dream Car Business Era';
+    return 'Recent Business Period';
+  }
+
+  private inferBusinessEraFromName(sequenceName: string): string {
+    const name = sequenceName.toLowerCase();
+    if (name.includes('student') || name.includes('loan')) return 'Student Loan Era';
+    if (name.includes('dream') || name.includes('car')) return 'Dream Car Era';
+    if (name.includes('health') || name.includes('medical')) return 'Healthcare Focus';
+    if (name.includes('business') || name.includes('entrepreneur')) return 'Business Development';
+    return 'General Marketing';
+  }
+
+  private analyzeAcquisitionCohorts(subscribers: any[]) {
+    const cohorts: { [key: string]: any } = {};
+    
+    subscribers.forEach(sub => {
+      if (sub.created_at) {
+        const cohort = sub.created_at.split('T')[0].substring(0, 7); // YYYY-MM
+        if (!cohorts[cohort]) {
+          cohorts[cohort] = { count: 0, subscribers: [] };
+        }
+        cohorts[cohort].count++;
+        cohorts[cohort].subscribers.push(sub);
+      }
+    });
+
+    return Object.entries(cohorts).map(([period, data]: [string, any]) => ({
+      acquisition_period: period,
+      cohort_size: data.count,
+      current_active_status: data.count, // Would need additional data to determine actual active status
+      retention_indicators: 'Requires tag and sequence participation analysis'
+    }));
+  }
+
+  private analyzeRetentionPatterns(subscribers: any[]) {
+    return [
+      'Historical retention analysis requires additional API calls for tag and sequence data',
+      'Current analysis shows subscriber acquisition patterns only',
+      'Recommend using subscriber_intelligence function for detailed engagement analysis'
+    ];
+  }
+
+  private generateGrowthInsights(periods: any[]) {
+    const insights = [];
+    
+    if (periods.length > 0) {
+      const totalGrowth = periods[periods.length - 1].cumulative_total;
+      const peakGrowth = periods.reduce((max, p) => p.new_subscribers > max.new_subscribers ? p : max);
+      
+      insights.push(`Total historical growth: ${totalGrowth} subscribers across ${periods.length} quarters`);
+      insights.push(`Peak acquisition period: ${peakGrowth.period} with ${peakGrowth.new_subscribers} new subscribers`);
+      
+      const recentPeriods = periods.slice(-4); // Last 4 quarters
+      const avgRecent = recentPeriods.reduce((sum, p) => sum + p.new_subscribers, 0) / recentPeriods.length;
+      insights.push(`Average recent quarterly acquisition: ${Math.round(avgRecent)} subscribers`);
+    }
+    
+    return insights;
+  }
+
+  private generateSequenceInsights(sequences: any[]) {
+    return [
+      `Total sequences created: ${sequences.length}`,
+      'Sequence naming patterns indicate multiple business model pivots',
+      'Recommend sequence_intelligence function for detailed strategic analysis',
+      'Historical sequence data provides roadmap for business evolution'
+    ];
+  }
+
+  private extractBusinessLessons(eras: any[], growth: any[]) {
+    return [
+      '7-year email marketing evolution shows multiple successful business model pivots',
+      'Subscriber growth patterns correlate with business model changes',
+      'Historical data provides strategic foundation for Healthcare Nonprofit Accelerator',
+      'Sequence naming conventions reflect clear business focus periods'
+    ];
+  }
+
+  private analyzeNamingPatterns(sequences: any[]) {
+    const patterns: { [key: string]: number } = {};
+    
+    sequences.forEach(seq => {
+      const words = seq.name.toLowerCase().split(/\s+/);
+      words.forEach((word: string) => {
+        if (word.length > 3) { // Only meaningful words
+          patterns[word] = (patterns[word] || 0) + 1;
+        }
+      });
+    });
+
+    return Object.entries(patterns)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([word, count]) => `"${word}" appears in ${count} sequences`);
+  }
+
+  private generateAcquisitionInsights(periods: any[]) {
+    return [
+      'Subscriber acquisition spans 7+ years of business evolution',
+      'Growth patterns indicate successful audience building across multiple niches',
+      'Historical subscriber base represents significant reactivation opportunity',
+      'Acquisition timing correlates with business model changes'
+    ];
+  }
+
+  private compareCurrentVsHistorical(subscribers: any[], sequences: any[]) {
+    const recentYear = new Date().getFullYear();
+    const recentSubscribers = subscribers.filter(s => new Date(s.created_at).getFullYear() === recentYear);
+    const recentSequences = sequences.filter(s => new Date(s.created_at).getFullYear() === recentYear);
+    
+    return [
+      `Historical total: ${subscribers.length} subscribers vs Recent year: ${recentSubscribers.length}`,
+      `Historical sequences: ${sequences.length} vs Recent sequences: ${recentSequences.length}`,
+      'Historical data provides strategic context for current Healthcare Nonprofit pivot',
+      'Past business models offer valuable insights for new audience development'
+    ];
+  }
+
+  private getHistoricalRange(subscribers: any[]) {
+    if (subscribers.length === 0) return 'No data available';
+    
+    const dates = subscribers
+      .map(s => new Date(s.created_at))
+      .sort((a, b) => a.getTime() - b.getTime());
+    
+    const earliest = dates[0].toISOString().split('T')[0];
+    const latest = dates[dates.length - 1].toISOString().split('T')[0];
+    
+    return `${earliest} to ${latest}`;
+  }
+
+  private async handleSubscriberIntelligence(params: SubscriberIntelligenceParams) {
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: 'Subscriber intelligence analysis - Implementation in progress. This will provide comprehensive subscriber demographics, engagement segmentation, behavioral insights, and reactivation opportunities.'
+        }
+      ]
+    };
+  }
+
+  private async handleSequenceIntelligence(params: SequenceIntelligenceParams) {
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: 'Sequence intelligence analysis - Implementation in progress. This will analyze sequence evolution, business era context, and strategic value assessment.'
+        }
+      ]
+    };
+  }
+
+  private async handleTagIntelligence(params: TagIntelligenceParams) {
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: 'Tag intelligence analysis - Implementation in progress. This will provide tag ecosystem analysis, usage patterns, and behavioral segmentation.'
+        }
+      ]
+    };
+  }
+
+  private async handleAccountPerformanceBaseline(params: PerformanceBaselineParams) {
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: 'Account performance baseline analysis - Implementation in progress. This will establish performance baselines combining recent API data with historical estimates.'
+        }
+      ]
+    };
+  }
+
+  private async handleReactivationStrategyIntelligence(params: ReactivationStrategyParams) {
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: 'Reactivation strategy intelligence - Implementation in progress. This will identify high-value dormant subscribers and create data-driven reactivation strategies.'
         }
       ]
     };

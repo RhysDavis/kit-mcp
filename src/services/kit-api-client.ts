@@ -184,6 +184,10 @@ export class KitApiClient {
     return this.makeRequest('get', `/subscribers/${id}`);
   }
 
+  public async getSubscriberTags(subscriberId: number): Promise<TagsResponse> {
+    return this.makeRequest<TagsResponse>('get', `/subscribers/${subscriberId}/tags`);
+  }
+
   public async createSubscribers(subscribers: Array<{
     email_address: string;
     first_name?: string;
