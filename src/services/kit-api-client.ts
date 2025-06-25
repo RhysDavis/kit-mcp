@@ -24,6 +24,7 @@ export interface KitApiError {
   message: string;
   code?: string;
   details?: any;
+  retryAfter?: number; // Seconds to wait before retrying (from Retry-After header)
 }
 
 export class KitApiClient {
@@ -108,7 +109,10 @@ export class KitApiClient {
         case 429:
           kitError.message = 'Rate limit exceeded';
           kitError.code = 'RATE_LIMIT_EXCEEDED';
-          // Implement retry logic for rate limits
+          // Retry-After header may contain seconds to wait
+          if (error.response.headers['retry-after']) {
+            kitError.retryAfter = parseInt(error.response.headers['retry-after']);
+          }
           break;
         case 500:
           kitError.message = 'Internal server error';

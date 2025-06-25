@@ -33,8 +33,12 @@ export class KitAuthConfig {
       maxRetries: parseInt(process.env.CONVERTKIT_MAX_RETRIES || '3')
     };
 
+    // Set rate limits based on authentication method per Kit API docs
+    // OAuth: 600 requests per minute, API Keys: 120 requests per minute
+    const defaultRequestsPerMinute = this.config.accessToken ? '600' : '120';
+    
     this.rateLimitConfig = {
-      requestsPerMinute: parseInt(process.env.CONVERTKIT_REQUESTS_PER_MINUTE || '100'),
+      requestsPerMinute: parseInt(process.env.CONVERTKIT_REQUESTS_PER_MINUTE || defaultRequestsPerMinute),
       burstLimit: parseInt(process.env.CONVERTKIT_BURST_LIMIT || '10'),
       retryDelay: parseInt(process.env.CONVERTKIT_RETRY_DELAY || '1000'),
       maxRetryDelay: parseInt(process.env.CONVERTKIT_MAX_RETRY_DELAY || '10000')

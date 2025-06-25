@@ -570,10 +570,13 @@ class KitMcpServer {
         // Try to get basic account info
         try {
           const accountInfo = await this.apiClient.getAccount();
-          console.error(`👤 Connected to Kit account: ${accountInfo.name || 'Unknown'}`);
-          if (accountInfo.email_address) {
-            console.error(`📧 Primary email: ${accountInfo.email_address}`);
+          console.error(`👤 Connected to Kit account ID: ${accountInfo.account.id}`);
+          if (accountInfo.account.name) {
+            console.error(`📝 Account name: ${accountInfo.account.name}`);
           }
+          console.error(`📧 Primary email: ${accountInfo.account.primary_email_address}`);
+          console.error(`📊 Plan: ${accountInfo.account.plan_type}`);
+          console.error(`🌐 Timezone: ${accountInfo.account.timezone.friendly_name}`);
         } catch (error) {
           console.error('ℹ️  Account details not available (may require different permissions)');
         }

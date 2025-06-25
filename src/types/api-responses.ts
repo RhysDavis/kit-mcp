@@ -61,14 +61,21 @@ export interface BulkOperationResponse {
 }
 
 export interface AccountResponse {
-  id: number;
-  name: string;
-  email_address: string;
-  timezone: string;
-  plan_type: string;
-  created_at: string;
-  subscriber_count: number;
-  monthly_email_sends: number;
+  user: {
+    email: string;
+  };
+  account: {
+    id: number;
+    name: string;
+    plan_type: string;
+    primary_email_address: string;
+    created_at: string;
+    timezone: {
+      name: string;
+      friendly_name: string;
+      utc_offset: string;
+    };
+  };
 }
 
 export interface StatsResponse {
