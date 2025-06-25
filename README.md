@@ -143,14 +143,6 @@ Automation and sequence optimization analysis.
 - `performance_period_days` (number): Performance analysis period
 - `include_optimization_suggestions` (boolean): Include AI recommendations
 
-## Healthcare Education Compliance
-
-This MCP includes specialized features for healthcare education compliance:
-
-- **Compliant Positioning**: Ensures all recommendations maintain healthcare education positioning
-- **Provider Segmentation**: Analyzes engagement by provider type and specialty
-- **Disclaimer Monitoring**: Tracks inclusion of required healthcare disclaimers
-- **Industry Benchmarking**: Compares performance against healthcare industry standards
 
 ## Rate Limiting
 

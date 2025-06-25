@@ -199,7 +199,7 @@ export function calculateConversionPotential(
   recommendations: string[];
 } {
   const currentRate = formData.conversion_rate || 0;
-  const industry_benchmark = 3.5; // Healthcare industry average
+  const industry_benchmark = 2.9; // Email marketing industry average
   
   const optimizationPotential = Math.max(0, industry_benchmark - currentRate);
   
