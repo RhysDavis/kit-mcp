@@ -134,6 +134,8 @@ export class KitApiClient {
     data?: any,
     params?: any
   ): Promise<T> {
+    console.error(`🌐 API ${method.toUpperCase()}: ${endpoint}`);
+    
     const config: AxiosRequestConfig = {
       method,
       url: endpoint,
@@ -142,6 +144,8 @@ export class KitApiClient {
     };
 
     const response = await this.axiosInstance.request<T>(config);
+    console.error(`📡 API Response: ${response.status} ${endpoint}`);
+    
     return response.data;
   }
 

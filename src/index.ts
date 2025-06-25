@@ -5,6 +5,7 @@
  * Provides comprehensive Kit API integration for marketing automation analysis
  */
 
+import 'dotenv/config';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -314,6 +315,12 @@ class KitMcpServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
+      // Log tool call
+      console.error(`🔧 Tool called: ${name}`);
+      if (args && Object.keys(args).length > 0) {
+        console.error(`📋 Parameters: ${JSON.stringify(args, null, 2)}`);
+      }
+
       try {
         switch (name) {
           case 'kit_account_audit':
@@ -355,6 +362,10 @@ class KitMcpServer {
               `Unknown tool: ${name}`
             );
         }
+        
+        // Log successful completion
+        console.error(`✅ Tool completed: ${name}`);
+        
       } catch (error) {
         console.error(`Error executing tool ${name}:`, error);
         
@@ -541,7 +552,37 @@ class KitMcpServer {
   public async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('Kit Marketing Automation MCP server running on stdio');
+    console.error('🚀 Kit Marketing Automation MCP server running on stdio');
+    
+    // Log account info on startup
+    await this.logAccountInfo();
+  }
+
+  private async logAccountInfo(): Promise<void> {
+    try {
+      console.error('🔗 Testing Kit API connection...');
+      const isConnected = await this.apiClient.testConnection();
+      
+      if (isConnected) {
+        console.error('✅ Kit API connection successful');
+        console.error(`🔐 Authentication mode: ${this.apiClient.getAuthMode()}`);
+        
+        // Try to get basic account info
+        try {
+          const accountInfo = await this.apiClient.getAccount();
+          console.error(`👤 Connected to Kit account: ${accountInfo.name || 'Unknown'}`);
+          if (accountInfo.email_address) {
+            console.error(`📧 Primary email: ${accountInfo.email_address}`);
+          }
+        } catch (error) {
+          console.error('ℹ️  Account details not available (may require different permissions)');
+        }
+      } else {
+        console.error('❌ Kit API connection failed - check your credentials in .env file');
+      }
+    } catch (error) {
+      console.error('❌ Failed to test Kit API connection:', error instanceof Error ? error.message : 'Unknown error');
+    }
   }
 }
 

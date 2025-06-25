@@ -144,6 +144,32 @@ Automation and sequence optimization analysis.
 - `include_optimization_suggestions` (boolean): Include AI recommendations
 
 
+## Claude Code Configuration
+
+After installation, configure the MCP server with Claude Code:
+
+### Add to Current Project
+```bash
+claude mcp add kit-mcp /path/to/kit-mcp/dist/index.js
+```
+
+### Add for All Projects (User-wide)
+```bash
+claude mcp add -s user kit-mcp /path/to/kit-mcp/dist/index.js
+```
+
+### Verify Configuration
+```bash
+claude mcp list
+```
+
+Once configured, you can use Kit marketing automation tools in your Claude conversations:
+- Account auditing and performance analysis
+- Subscriber segmentation and analysis
+- Campaign optimization recommendations
+- Automation workflow analysis
+- Form and landing page optimization
+
 ## Rate Limiting
 
 The MCP automatically handles Kit's rate limits:
