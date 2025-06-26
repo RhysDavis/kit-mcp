@@ -32,9 +32,9 @@ export class KitApiClient {
   private authConfig: KitAuthConfig;
   private rateLimiter: RateLimiter;
 
-  constructor() {
-    this.authConfig = new KitAuthConfig();
-    this.rateLimiter = new RateLimiter(this.authConfig.getRateLimitConfig());
+  constructor(authConfig?: KitAuthConfig, rateLimiter?: RateLimiter) {
+    this.authConfig = authConfig || new KitAuthConfig();
+    this.rateLimiter = rateLimiter || new RateLimiter(this.authConfig.getRateLimitConfig());
     
     const config = this.authConfig.getConfig();
     
